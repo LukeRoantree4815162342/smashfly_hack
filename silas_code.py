@@ -1,39 +1,18 @@
-job_dfs = [successful_df[successful_df[j]==True] for j in jobs]
 
-age_stats = {jobs_unique[i]: {"kurtosis":df["Age"].kurtosis(), "skew":df["Age"].skew()} for i,df in enumerate(job_dfs)}
+Smashfly = pd.read_csv("SF_Datathon_Data.csv", encoding='utf-8')
+sf_df = pd.DataFrame(Smashfly)
+#print(sf_df.head())
+jobs_unique = sf_df['Job_Type'].unique()
 
-#print(age_stats)
-#plt.figure()
+cat_columns = ["Qualification_type", "Job_Type", "Race"]
+#print(sf_df.columns)
+sf_df = pd.get_dummies(sf_df, prefix_sep="_", columns=cat_columns)
+sf_df["Gender_M"] = sf_df["Gender"] == "M"
+sf_df["Gender_F"] = sf_df["Gender"] == "F"
+sf_df["Gender_Unspecified"] = 1 - sf_df["Gender_F"] - sf_df["Gender_M"]
+sf_df["Gender_Unspecified"] = sf_df["Gender_Unspecified"].astype('bool')
+del sf_df['Gender']
+del sf_df['Name']
+sf_df.loc[sf_df['Qualification_type_1']+sf_df['Qualification_type_2']+sf_df['Qualification_type_3'] == 0, ['GPA']] = np.NaN
 
-statistics = ["skew", "kurtosis"]
-fig, ax = plt.subplots(len(statistics), sharex=True)
-
-for row in range(len(statistics)):
-    ax[row].bar(range(len(jobs)), [age_stats[j][statistics[row]] for j in jobs_unique])
-    ax[row].set_xticks(range(len(jobs)))
-    ax[row].set_xticklabels([j.replace(' ','\n') for j in jobs_unique], rotation=45, size=9)
-    ax[row].set_ylabel(statistics[row])
-fig.suptitle("Description of Interviewed Applicant Age by Job Type", size=10)
-
-"""
-and;
-"""
-
-job_dfs = [successful_df[successful_df[j]==True] for j in jobs]
-
-age_stats = {jobs_unique[i]: df["Age"].describe() for i,df in enumerate(job_dfs)}
-
-#print(age_stats)
-#plt.figure()
-
-statistics = ["mean", "std", "50%", "25%", "75%"]
-fig, ax = plt.subplots(len(statistics), sharex=True)
-
-for row in range(len(statistics)):
-    ax[row].bar(range(len(jobs)), [age_stats[j][statistics[row]] for j in jobs_unique])
-    ax[row].set_xticks(range(len(jobs)))
-    ax[row].set_xticklabels([j.replace(' ','\n') for j in jobs_unique], rotation=45, size=9)
-    ax[row].set_ylabel(statistics[row])
-fig.suptitle("Description of Interviewed Applicant Age by Job Type", size=10)
-
-
+print(sf_df.columns)
